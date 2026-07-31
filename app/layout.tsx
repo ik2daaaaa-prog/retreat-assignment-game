@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import RaceOverview from "./RaceOverview";
 
 export const metadata: Metadata = {
   title: "BMW Apex — Autobahn Rush",
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ko"><body>{children}</body></html>;
+  return <html lang="ko"><body>{children}<RaceOverview /></body></html>;
 }
