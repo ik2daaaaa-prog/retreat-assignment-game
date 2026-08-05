@@ -5,7 +5,7 @@ import { AssignmentBoard } from "./components/AssignmentBoard";
 import { ParticipantSetup } from "./components/ParticipantSetup";
 import { LadderBoard } from "./components/LadderBoard";
 import { VehicleRegistration } from "./components/VehicleRegistration";
-import { createSeatAssignments, createVehicle, driverSelectionComplete, passengerSeatIds, remainingParticipantIds, resetGamePhase, roomCandidateIds, validateCapacity, type Assignment, type Phase, type Vehicle } from "./lib/assignment";
+import { balanceVehicleSeats, createSeatAssignments, createVehicle, driverSelectionComplete, passengerSeatIds, remainingParticipantIds, resetGamePhase, roomCandidateIds, validateCapacity, type Assignment, type Phase, type Vehicle } from "./lib/assignment";
 
 type Room = { id: string; label: string; capacity: number };
 const seatNames: Record<string, string> = { "front-right": "조수석", "row2-left": "2열 왼쪽", "row2-right": "2열 오른쪽", "row3-left": "3열 왼쪽", "row3-right": "3열 오른쪽" };
@@ -51,7 +51,7 @@ export default function Home() {
 
   const reset = () => { localStorage.removeItem("retreat-assignment-game-v1"); setPhase(resetGamePhase()); setParticipants([]); setDriverIds([]); setDriverTarget(1); setVehicleLabels({}); setVehicles([]); setVehicleSeatAssignments({}); setSeatIndex(0); setRooms([{ id: "room-1", label: "1호실", capacity: 2 }]); setRoomAssignments({}); setRoomSlotIndex(0); setCapacityError(""); setRoomError(""); };
   const registerVehicles = () => {
-    const nextVehicles = driverIds.map((driverId, index) => createVehicle(`vehicle-${index + 1}`, driverId, vehicleLabels[driverId] || ""));
+    const nextVehicles = balanceVehicleSeats(driverIds.map((driverId, index) => createVehicle(`vehicle-${index + 1}`, driverId, vehicleLabels[driverId] || "")), participants.length);
     const capacity = validateCapacity(participants.length, nextVehicles);
     if (!capacity.valid) { setCapacityError(`좌석이 ${capacity.missingSeats}자리 부족합니다. 운전자를 추가하거나 차량을 수정하세요.`); return; }
     setCapacityError(""); setVehicles(nextVehicles); setVehicleSeatAssignments(Object.assign({}, ...nextVehicles.map(createSeatAssignments))); setSeatIndex(0); setPhase("seats");

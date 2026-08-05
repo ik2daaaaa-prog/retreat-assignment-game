@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { selectRandom } from "../lib/assignment";
+import { ladderDestination } from "../lib/assignment";
 
 export type LadderItem = { id: string; label: string };
-type Rung = { top: number; column: number };
+type Rung = { top: number; row: number; column: number };
 
 type LadderBoardProps = {
   candidates: LadderItem[];
@@ -17,6 +17,8 @@ export function LadderBoard({ candidates, onComplete, buttonLabel = "사다리 �
   const [running, setRunning] = useState(false);
   const [rungs, setRungs] = useState<Rung[]>([]);
   const [winner, setWinner] = useState<LadderItem | null>(null);
+  const [startColumn, setStartColumn] = useState(0);
+  const [endColumn, setEndColumn] = useState(0);
   const timerRef = useRef<number | null>(null);
   const columns = Math.max(2, Math.min(6, candidates.length || 2));
 
@@ -24,10 +26,13 @@ export function LadderBoard({ candidates, onComplete, buttonLabel = "사다리 �
 
   const climb = () => {
     if (running || !candidates.length) return;
-    const nextRungs = Array.from({ length: 8 }, (_, index) => ({ top: 12 + index * 10, column: Math.floor(Math.random() * Math.max(1, columns - 1)) }));
-    const selected = selectRandom(candidates);
-    if (!selected) return;
+    const nextRungs = Array.from({ length: 8 }, (_, index) => ({ top: 12 + index * 10, row: index, column: Math.floor(Math.random() * Math.max(1, columns - 1)) }));
+    const initialColumn = Math.floor(Math.random() * columns);
+    const destination = ladderDestination(initialColumn, nextRungs, columns);
+    const selected = candidates[destination % candidates.length];
     setRungs(nextRungs);
+    setStartColumn(initialColumn);
+    setEndColumn(destination);
     setWinner(null);
     setRunning(true);
     timerRef.current = window.setTimeout(() => {
@@ -44,7 +49,7 @@ export function LadderBoard({ candidates, onComplete, buttonLabel = "사다리 �
         <div className="ladder-lines">
           {Array.from({ length: columns }, (_, index) => <i className="ladder-line" style={{ left: `${(index * 100) / (columns - 1)}%` }} key={index} />)}
           {rungs.map((rung, index) => <b className="ladder-rung" style={{ top: `${rung.top}%`, left: `${(rung.column * 100) / (columns - 1)}%`, width: `${100 / (columns - 1)}%` }} key={index} />)}
-          {running && <em className="ladder-climber" />}
+          {running && <em className="ladder-climber" style={{ "--start-left": `${(startColumn * 100) / (columns - 1)}%`, "--end-left": `${(endColumn * 100) / (columns - 1)}%` } as CSSProperties} />}
         </div>
         <div className="ladder-results">{candidates.slice(0, columns).map((candidate) => <span className={winner?.id === candidate.id ? "is-winner" : ""} key={candidate.id}>{winner?.id === candidate.id ? "당첨" : "도착"}</span>)}</div>
       </div>

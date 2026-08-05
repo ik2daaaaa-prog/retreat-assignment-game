@@ -12,10 +12,22 @@ export type Assignment = Record<string, string>;
 
 const CARNIVAL_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right", "row3-left", "row3-right"];
 const STANDARD_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right"];
+const COMPACT_SEATS: SeatId[] = ["driver", "front-right", "row2-left"];
 
 export function createVehicle(id: string, driverId: string, label: string): Vehicle {
   const cleanLabel = label.trim();
-  return { id, driverId, label: cleanLabel, seatIds: /카니발/i.test(cleanLabel) ? CARNIVAL_SEATS : STANDARD_SEATS };
+  const isCarnival = /카니발/i.test(cleanLabel);
+  const isCompact = /경차|레이|모닝|스파크|캐스퍼/i.test(cleanLabel);
+  return { id, driverId, label: cleanLabel, seatIds: isCompact ? COMPACT_SEATS : isCarnival ? CARNIVAL_SEATS : STANDARD_SEATS };
+}
+
+export function balanceVehicleSeats(vehicles: Vehicle[], participantCount: number): Vehicle[] {
+  if (!vehicles.length) return vehicles;
+  const targetCapacity = Math.max(1, Math.ceil(participantCount / vehicles.length));
+  return vehicles.map((vehicle) => {
+    if (vehicle.seatIds.length === COMPACT_SEATS.length) return vehicle;
+    return { ...vehicle, seatIds: vehicle.seatIds.slice(0, Math.min(vehicle.seatIds.length, targetCapacity)) };
+  });
 }
 
 export function passengerSeatIds(vehicle: Vehicle): SeatId[] {
@@ -61,4 +73,15 @@ export function resetGamePhase(): Phase {
 
 export function firstArrival<T extends { arrival: number }>(items: T[]): T | null {
   return items.reduce<T | null>((winner, item) => winner === null || item.arrival < winner.arrival ? item : winner, null);
+}
+
+export type LadderRung = { row: number; column: number };
+
+export function ladderDestination(startColumn: number, rungs: LadderRung[], columnCount: number): number {
+  let column = Math.max(0, Math.min(columnCount - 1, startColumn));
+  for (const rung of [...rungs].sort((a, b) => a.row - b.row)) {
+    if (rung.column === column) column += 1;
+    else if (rung.column === column - 1) column -= 1;
+  }
+  return column;
 }
