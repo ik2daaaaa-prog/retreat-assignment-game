@@ -4,6 +4,7 @@ import {
   createSeatAssignments,
   createVehicle,
   driverSelectionComplete,
+  resetGamePhase,
   normalizeDriverCount,
   passengerSeatIds,
   remainingParticipantIds,
@@ -46,4 +47,8 @@ test("운전자 수는 참가자 수 안에서 정규화되고 목표 수만큼 
   assert.equal(normalizeDriverCount(99, 5), 5);
   assert.equal(driverSelectionComplete(2, 3), false);
   assert.equal(driverSelectionComplete(3, 3), true);
+});
+
+test("홈 제목을 누르면 준비 화면 단계로 돌아간다", () => {
+  assert.equal(resetGamePhase(), "setup");
 });

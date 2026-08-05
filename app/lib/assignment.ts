@@ -54,3 +54,7 @@ export function normalizeDriverCount(value: number, participantCount: number): n
 export function driverSelectionComplete(selectedCount: number, targetCount: number): boolean {
   return targetCount > 0 && selectedCount === targetCount;
 }
+
+export function resetGamePhase(): Phase {
+  return "setup";
+}

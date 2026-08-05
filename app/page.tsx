@@ -5,7 +5,7 @@ import { AssignmentBoard } from "./components/AssignmentBoard";
 import { ParticipantSetup } from "./components/ParticipantSetup";
 import { Roulette } from "./components/Roulette";
 import { VehicleRegistration } from "./components/VehicleRegistration";
-import { createSeatAssignments, createVehicle, driverSelectionComplete, passengerSeatIds, remainingParticipantIds, roomCandidateIds, validateCapacity, type Assignment, type Phase, type Vehicle } from "./lib/assignment";
+import { createSeatAssignments, createVehicle, driverSelectionComplete, passengerSeatIds, remainingParticipantIds, resetGamePhase, roomCandidateIds, validateCapacity, type Assignment, type Phase, type Vehicle } from "./lib/assignment";
 
 type Room = { id: string; label: string; capacity: number };
 const seatNames: Record<string, string> = { "front-right": "조수석", "row2-left": "2열 왼쪽", "row2-right": "2열 오른쪽", "row3-left": "3열 왼쪽", "row3-right": "3열 오른쪽" };
@@ -49,7 +49,7 @@ export default function Home() {
   }, []);
   useEffect(() => { if (hydrated) localStorage.setItem("retreat-assignment-game-v1", JSON.stringify({ phase, participants, driverIds, driverTarget, vehicleLabels, vehicles, vehicleSeatAssignments, seatIndex, rooms, roomAssignments, roomSlotIndex })); }, [hydrated, phase, participants, driverIds, driverTarget, vehicleLabels, vehicles, vehicleSeatAssignments, seatIndex, rooms, roomAssignments, roomSlotIndex]);
 
-  const reset = () => { localStorage.removeItem("retreat-assignment-game-v1"); setPhase("setup"); setParticipants([]); setDriverIds([]); setDriverTarget(1); setVehicleLabels({}); setVehicles([]); setVehicleSeatAssignments({}); setSeatIndex(0); setRooms([{ id: "room-1", label: "1호실", capacity: 2 }]); setRoomAssignments({}); setRoomSlotIndex(0); setCapacityError(""); setRoomError(""); };
+  const reset = () => { localStorage.removeItem("retreat-assignment-game-v1"); setPhase(resetGamePhase()); setParticipants([]); setDriverIds([]); setDriverTarget(1); setVehicleLabels({}); setVehicles([]); setVehicleSeatAssignments({}); setSeatIndex(0); setRooms([{ id: "room-1", label: "1호실", capacity: 2 }]); setRoomAssignments({}); setRoomSlotIndex(0); setCapacityError(""); setRoomError(""); };
   const registerVehicles = () => {
     const nextVehicles = driverIds.map((driverId, index) => createVehicle(`vehicle-${index + 1}`, driverId, vehicleLabels[driverId] || ""));
     const capacity = validateCapacity(participants.length, nextVehicles);
@@ -64,7 +64,7 @@ export default function Home() {
   const summaryText = [...vehicles.map((vehicle) => `${vehicle.label}: ${vehicleSeatAssignments[`${vehicle.id}:driver`] || vehicle.driverId}`), ...rooms.map((room) => `${room.label}: ${Object.entries(roomAssignments).filter(([key]) => key.startsWith(`${room.id}:`)).map(([, value]) => value).join(", ")}`)].join("\n");
 
   return <main className="app-shell">
-    <header className="topbar"><div className="brand-lockup"><span className="brand-mark">Y</span><div><div className="section-kicker">WEEKEND RETREAT · RANDOMIZER</div><h1>우리들의 <em>야유회</em></h1></div></div><button className="text-button" type="button" onClick={reset}>전체 초기화</button></header>
+    <header className="topbar"><button className="brand-home" type="button" onClick={reset} aria-label="처음 화면으로 돌아가기"><span className="brand-lockup"><span className="brand-mark">Y</span><span><span className="section-kicker">WEEKEND RETREAT · RANDOMIZER</span><h1>나만 아니면 <em>돼!!!</em></h1></span></span></button><button className="text-button" type="button" onClick={reset}>전체 초기화</button></header>
     <section className="progress-strip" aria-label="진행 단계">{["참가자", "운전자", "차량·좌석", "방"].map((label, index) => <span className={(index === 0 && phase === "setup") || (index === 1 && phase === "drivers") ? "active" : ""} key={label}><b>{String(index + 1).padStart(2, "0")}</b>{label}</span>)}</section>
     {phase === "setup" && <ParticipantSetup participants={participants} onChange={setParticipants} onStart={(count) => { setDriverTarget(count); setDriverIds([]); setPhase("drivers"); }} />}
     {phase === "drivers" && <section className="game-card"><div className="section-kicker">ROUND 01 · DRIVER DRAW</div><h2>오늘의 운전자를 뽑습니다</h2><p className="intro">필요한 운전자 수: <b>{driverTarget}명</b> · 현재 추첨: <b>{driverIds.length}/{driverTarget}명</b></p><div className="game-grid"><Roulette candidates={driverCandidates} onComplete={(winner) => setDriverIds((current) => current.length < driverTarget ? [...current, winner.id] : current)} buttonLabel="운전자 추첨" /><aside className="result-panel"><div className="panel-label">확정된 운전자</div>{driverIds.length ? driverIds.map((id, index) => <div className="result-row" key={id}><span>DRIVER {String(index + 1).padStart(2, "0")}</span><strong>{id}</strong></div>) : <p className="empty-state">아직 추첨 결과가 없습니다.</p>}<button className="primary-button" type="button" disabled={!driverSelectionComplete(driverIds.length, driverTarget)} onClick={() => setPhase("vehicles")}>운전자 확정 <span>→</span></button></aside></div><button className="back-button" type="button" onClick={() => setPhase("setup")}>← 참가자 수정</button></section>}

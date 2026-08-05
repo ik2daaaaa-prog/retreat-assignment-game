@@ -17,8 +17,9 @@ test("server-renders the retreat assignment game shell", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
+  assert.match(html, /나만 아니면/);
   assert.match(html, /야유회 랜덤 배정 게임/);
   assert.match(html, /참가자 추가/);
   assert.match(html, /게임 시작/);
-  assert.doesNotMatch(html, /BMW APEX|Autobahn Rush/);
+  assert.doesNotMatch(html, /BMW APEX|Autobahn Rush|우리들의 야유회/);
 });
