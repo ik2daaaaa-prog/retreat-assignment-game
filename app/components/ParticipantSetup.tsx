@@ -11,7 +11,7 @@ type ParticipantSetupProps = {
 
 export function ParticipantSetup({ participants, onChange, onStart }: ParticipantSetupProps) {
   const [draft, setDraft] = useState("");
-  const [driverCount, setDriverCount] = useState(1);
+  const [driverCount, setDriverCount] = useState("1");
 
   const addParticipant = () => {
     const name = draft.trim();
@@ -43,8 +43,8 @@ export function ParticipantSetup({ participants, onChange, onStart }: Participan
           </button>
         ))}
       </div>
-      <div className="driver-count-row"><label htmlFor="driver-count">필요한 운전자 수</label><input id="driver-count" type="number" min="1" max={Math.max(1, participants.length)} value={driverCount} onChange={(event) => setDriverCount(Number(event.target.value))} /><span>명</span></div>
-      <button className="primary-button" type="button" disabled={participants.length < 2} onClick={() => onStart(normalizeDriverCount(driverCount, participants.length))}>게임 시작 <span>→</span></button>
+      <div className="driver-count-row"><label htmlFor="driver-count">필요한 운전자 수</label><input id="driver-count" type="number" min="1" max={Math.max(1, participants.length)} value={driverCount} onChange={(event) => setDriverCount(event.target.value.replace(/[^0-9]/g, ""))} /><span>명</span></div>
+      <button className="primary-button" type="button" disabled={participants.length < 2} onClick={() => onStart(normalizeDriverCount(Number(driverCount || "1"), participants.length))}>게임 시작 <span>→</span></button>
       <p className="hint">최소 2명 · 이름을 눌러 삭제 · 운전자 수는 참가자 수 이내</p>
     </section>
   );
