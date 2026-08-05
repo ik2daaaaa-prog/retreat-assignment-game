@@ -1,0 +1,39 @@
+export type SeatId =
+  | "driver"
+  | "front-right"
+  | "row2-left"
+  | "row2-right"
+  | "row3-left"
+  | "row3-right";
+
+export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "rooms" | "chores" | "summary";
+export type Vehicle = { id: string; driverId: string; label: string; seatIds: SeatId[] };
+export type Assignment = Record<string, string>;
+
+const CARNIVAL_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right", "row3-left", "row3-right"];
+const STANDARD_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right"];
+
+export function createVehicle(id: string, driverId: string, label: string): Vehicle {
+  const cleanLabel = label.trim();
+  return { id, driverId, label: cleanLabel, seatIds: /카니발/i.test(cleanLabel) ? CARNIVAL_SEATS : STANDARD_SEATS };
+}
+
+export function passengerSeatIds(vehicle: Vehicle): SeatId[] {
+  return vehicle.seatIds.filter((seatId) => seatId !== "driver");
+}
+
+export function remainingParticipantIds(ids: string[], excluded: string[]): string[] {
+  const excludedSet = new Set(excluded);
+  return ids.filter((id) => !excludedSet.has(id));
+}
+
+export function selectRandom<T>(items: T[], random = Math.random): T | null {
+  return items.length > 0 ? items[Math.floor(random() * items.length)] : null;
+}
+
+export function validateCapacity(participantCount: number, vehicles: Vehicle[]) {
+  const availableSeats = vehicles.reduce((total, vehicle) => total + passengerSeatIds(vehicle).length, 0);
+  const passengerCount = Math.max(0, participantCount - vehicles.length);
+  const missingSeats = Math.max(0, passengerCount - availableSeats);
+  return { valid: missingSeats === 0, availableSeats, missingSeats };
+}
