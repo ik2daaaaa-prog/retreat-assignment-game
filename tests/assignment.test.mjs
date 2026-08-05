@@ -11,6 +11,8 @@ import {
   roomCandidateIds,
   selectRandom,
   validateCapacity,
+  createFortuneDeck,
+  removeFortuneCard,
 } from "../app/lib/assignment.ts";
 
 test("카니발은 3열 양쪽 좌석만 생성한다", () => {
@@ -51,4 +53,10 @@ test("운전자 수는 참가자 수 안에서 정규화되고 목표 수만큼 
 
 test("홈 제목을 누르면 준비 화면 단계로 돌아간다", () => {
   assert.equal(resetGamePhase(), "setup");
+});
+
+test("fortune cards start with three options and remove used cards", () => {
+  const deck = createFortuneDeck();
+  assert.deepEqual(deck, ["driverSwap", "seatProtect", "reroll"]);
+  assert.deepEqual(removeFortuneCard(deck, "seatProtect"), ["driverSwap", "reroll"]);
 });
