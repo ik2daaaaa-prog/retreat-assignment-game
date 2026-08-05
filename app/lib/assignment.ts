@@ -6,7 +6,7 @@ export type SeatId =
   | "row3-left"
   | "row3-right";
 
-export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "roomSetup" | "rooms" | "choreSetup" | "chores" | "summary";
+export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "roomSetup" | "rooms" | "summary";
 export type Vehicle = { id: string; driverId: string; label: string; seatIds: SeatId[] };
 export type Assignment = Record<string, string>;
 
@@ -46,6 +46,11 @@ export function roomCandidateIds(participantIds: string[], roomAssignments: Assi
   return remainingParticipantIds(participantIds, Object.values(roomAssignments));
 }
 
-export function choreCandidateIds(participantIds: string[]): string[] {
-  return [...participantIds];
+export function normalizeDriverCount(value: number, participantCount: number): number {
+  if (participantCount <= 0) return 0;
+  return Math.min(participantCount, Math.max(1, Math.floor(Number.isFinite(value) ? value : 1)));
+}
+
+export function driverSelectionComplete(selectedCount: number, targetCount: number): boolean {
+  return targetCount > 0 && selectedCount === targetCount;
 }

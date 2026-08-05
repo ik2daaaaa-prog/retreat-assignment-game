@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { normalizeDriverCount } from "../lib/assignment";
 
 type ParticipantSetupProps = {
   participants: string[];
   onChange: (participants: string[]) => void;
-  onStart: () => void;
+  onStart: (driverCount: number) => void;
 };
 
 export function ParticipantSetup({ participants, onChange, onStart }: ParticipantSetupProps) {
   const [draft, setDraft] = useState("");
+  const [driverCount, setDriverCount] = useState(1);
 
   const addParticipant = () => {
     const name = draft.trim();
@@ -22,7 +24,7 @@ export function ParticipantSetup({ participants, onChange, onStart }: Participan
     <section className="setup-card">
       <div className="section-kicker">ROUND 00 · CHECK-IN</div>
       <h2>야유회 랜덤 배정 게임</h2>
-      <p className="intro">참가자를 등록하면 운전자부터 좌석, 방, 설거지까지 룰렛으로 정합니다.</p>
+      <p className="intro">참가자를 등록하면 운전자부터 차량 좌석과 방까지 룰렛으로 정합니다.</p>
       <div className="input-row">
         <input
           value={draft}
@@ -41,8 +43,9 @@ export function ParticipantSetup({ participants, onChange, onStart }: Participan
           </button>
         ))}
       </div>
-      <button className="primary-button" type="button" disabled={participants.length < 2} onClick={onStart}>게임 시작 <span>→</span></button>
-      <p className="hint">최소 2명 · 이름을 눌러 삭제</p>
+      <div className="driver-count-row"><label htmlFor="driver-count">필요한 운전자 수</label><input id="driver-count" type="number" min="1" max={Math.max(1, participants.length)} value={driverCount} onChange={(event) => setDriverCount(Number(event.target.value))} /><span>명</span></div>
+      <button className="primary-button" type="button" disabled={participants.length < 2} onClick={() => onStart(normalizeDriverCount(driverCount, participants.length))}>게임 시작 <span>→</span></button>
+      <p className="hint">최소 2명 · 이름을 눌러 삭제 · 운전자 수는 참가자 수 이내</p>
     </section>
   );
 }

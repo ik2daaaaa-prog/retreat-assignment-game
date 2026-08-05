@@ -3,7 +3,8 @@ import test from "node:test";
 import {
   createSeatAssignments,
   createVehicle,
-  choreCandidateIds,
+  driverSelectionComplete,
+  normalizeDriverCount,
   passengerSeatIds,
   remainingParticipantIds,
   roomCandidateIds,
@@ -35,9 +36,14 @@ test("운전자는 운전석에 고정되고 남은 참가자만 좌석 후보�
   assert.equal(passengerSeatIds(vehicle).includes("row3-right"), true);
 });
 
-test("방은 이미 배정된 사람을 제외하고 설거지는 전체 참가자를 다시 후보로 쓴다", () => {
+test("방은 이미 배정된 사람을 제외하고 후보를 계산한다", () => {
   const all = ["p1", "p2", "p3"];
   assert.deepEqual(roomCandidateIds(all, { "room-a:0": "p1" }), ["p2", "p3"]);
-  assert.deepEqual(choreCandidateIds(all), all);
-  assert.deepEqual(choreCandidateIds(all), all);
+});
+
+test("운전자 수는 참가자 수 안에서 정규화되고 목표 수만큼 뽑아야 확정된다", () => {
+  assert.equal(normalizeDriverCount(0, 5), 1);
+  assert.equal(normalizeDriverCount(99, 5), 5);
+  assert.equal(driverSelectionComplete(2, 3), false);
+  assert.equal(driverSelectionComplete(3, 3), true);
 });
