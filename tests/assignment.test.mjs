@@ -3,8 +3,10 @@ import test from "node:test";
 import {
   createSeatAssignments,
   createVehicle,
+  choreCandidateIds,
   passengerSeatIds,
   remainingParticipantIds,
+  roomCandidateIds,
   selectRandom,
   validateCapacity,
 } from "../app/lib/assignment.ts";
@@ -31,4 +33,11 @@ test("운전자는 운전석에 고정되고 남은 참가자만 좌석 후보�
   assert.deepEqual(createSeatAssignments(vehicle), { "v1:driver": "p1" });
   assert.deepEqual(remainingParticipantIds(["p1", "p2", "p3"], Object.values(assignments)), ["p3"]);
   assert.equal(passengerSeatIds(vehicle).includes("row3-right"), true);
+});
+
+test("방은 이미 배정된 사람을 제외하고 설거지는 전체 참가자를 다시 후보로 쓴다", () => {
+  const all = ["p1", "p2", "p3"];
+  assert.deepEqual(roomCandidateIds(all, { "room-a:0": "p1" }), ["p2", "p3"]);
+  assert.deepEqual(choreCandidateIds(all), all);
+  assert.deepEqual(choreCandidateIds(all), all);
 });

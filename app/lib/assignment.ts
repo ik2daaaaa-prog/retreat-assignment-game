@@ -6,7 +6,7 @@ export type SeatId =
   | "row3-left"
   | "row3-right";
 
-export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "rooms" | "chores" | "summary";
+export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "roomSetup" | "rooms" | "choreSetup" | "chores" | "summary";
 export type Vehicle = { id: string; driverId: string; label: string; seatIds: SeatId[] };
 export type Assignment = Record<string, string>;
 
@@ -40,4 +40,12 @@ export function validateCapacity(participantCount: number, vehicles: Vehicle[]) 
   const passengerCount = Math.max(0, participantCount - vehicles.length);
   const missingSeats = Math.max(0, passengerCount - availableSeats);
   return { valid: missingSeats === 0, availableSeats, missingSeats };
+}
+
+export function roomCandidateIds(participantIds: string[], roomAssignments: Assignment): string[] {
+  return remainingParticipantIds(participantIds, Object.values(roomAssignments));
+}
+
+export function choreCandidateIds(participantIds: string[]): string[] {
+  return [...participantIds];
 }
