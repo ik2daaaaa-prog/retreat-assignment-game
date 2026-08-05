@@ -70,6 +70,11 @@ test("경차는 3명이고 차량 3대에 9명이면 차량별 3명으로 맞춘
   assert.deepEqual(cars.map((car) => car.seatIds.length), [3, 3, 3]);
 });
 
+test("20명과 5대는 4명씩 균등하게 나눈다", () => {
+  const cars = balanceVehicleSeats(Array.from({ length: 5 }, (_, index) => createVehicle(`v${index}`, `p${index}`, "쏘나타")), 20);
+  assert.deepEqual(cars.map((car) => car.seatIds.length), [4, 4, 4, 4, 4]);
+});
+
 test("사다리는 가로줄을 만날 때마다 다음 세로줄로 이동한다", () => {
   assert.equal(ladderDestination(0, [{ row: 0, column: 0 }, { row: 1, column: 1 }], 3), 2);
 });

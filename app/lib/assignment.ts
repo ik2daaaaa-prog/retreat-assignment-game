@@ -23,9 +23,11 @@ export function createVehicle(id: string, driverId: string, label: string): Vehi
 
 export function balanceVehicleSeats(vehicles: Vehicle[], participantCount: number): Vehicle[] {
   if (!vehicles.length) return vehicles;
-  const targetCapacity = Math.max(1, Math.ceil(participantCount / vehicles.length));
-  return vehicles.map((vehicle) => {
+  const baseCapacity = Math.max(1, Math.floor(participantCount / vehicles.length));
+  const remainder = Math.max(0, participantCount % vehicles.length);
+  return vehicles.map((vehicle, index) => {
     if (vehicle.seatIds.length === COMPACT_SEATS.length) return vehicle;
+    const targetCapacity = baseCapacity + (index < remainder ? 1 : 0);
     return { ...vehicle, seatIds: vehicle.seatIds.slice(0, Math.min(vehicle.seatIds.length, targetCapacity)) };
   });
 }
