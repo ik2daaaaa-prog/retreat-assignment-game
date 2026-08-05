@@ -11,8 +11,6 @@ import {
   roomCandidateIds,
   selectRandom,
   validateCapacity,
-  createFortuneDeck,
-  removeFortuneCard,
   firstArrival,
 } from "../app/lib/assignment.ts";
 
@@ -54,12 +52,6 @@ test("운전자 수는 참가자 수 안에서 정규화되고 목표 수만큼 
 
 test("홈 제목을 누르면 준비 화면 단계로 돌아간다", () => {
   assert.equal(resetGamePhase(), "setup");
-});
-
-test("fortune cards start with three options and remove used cards", () => {
-  const deck = createFortuneDeck();
-  assert.deepEqual(deck, ["driverSwap", "seatProtect", "reroll"]);
-  assert.deepEqual(removeFortuneCard(deck, "seatProtect"), ["driverSwap", "reroll"]);
 });
 
 test("핀볼은 구멍에 가장 먼저 도착한 공을 당첨자로 선택한다", () => {

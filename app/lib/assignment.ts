@@ -9,14 +9,6 @@ export type SeatId =
 export type Phase = "setup" | "drivers" | "vehicles" | "seats" | "roomSetup" | "rooms" | "summary";
 export type Vehicle = { id: string; driverId: string; label: string; seatIds: SeatId[] };
 export type Assignment = Record<string, string>;
-export type FortuneCardId = "driverSwap" | "seatProtect" | "reroll";
-export type FortuneCard = { id: FortuneCardId; label: string; description: string };
-
-export const FORTUNE_CARDS: FortuneCard[] = [
-  { id: "driverSwap", label: "운전자 교체", description: "확정 운전자 한 명과 후보 한 명의 운명을 바꿉니다." },
-  { id: "seatProtect", label: "자리 보호", description: "다음 좌석 룰렛에 보호 대상을 우선 배정합니다." },
-  { id: "reroll", label: "한 번 더 돌리기", description: "현재 룰렛 결과를 무효화하고 다시 도전합니다." },
-];
 
 const CARNIVAL_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right", "row3-left", "row3-right"];
 const STANDARD_SEATS: SeatId[] = ["driver", "front-right", "row2-left", "row2-right"];
@@ -65,14 +57,6 @@ export function driverSelectionComplete(selectedCount: number, targetCount: numb
 
 export function resetGamePhase(): Phase {
   return "setup";
-}
-
-export function createFortuneDeck(): FortuneCardId[] {
-  return FORTUNE_CARDS.map((card) => card.id);
-}
-
-export function removeFortuneCard(deck: FortuneCardId[], cardId: FortuneCardId): FortuneCardId[] {
-  return deck.filter((id) => id !== cardId);
 }
 
 export function firstArrival<T extends { arrival: number }>(items: T[]): T | null {
