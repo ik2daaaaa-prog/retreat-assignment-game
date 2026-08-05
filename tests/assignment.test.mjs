@@ -13,6 +13,7 @@ import {
   validateCapacity,
   createFortuneDeck,
   removeFortuneCard,
+  firstArrival,
 } from "../app/lib/assignment.ts";
 
 test("카니발은 3열 양쪽 좌석만 생성한다", () => {
@@ -59,4 +60,9 @@ test("fortune cards start with three options and remove used cards", () => {
   const deck = createFortuneDeck();
   assert.deepEqual(deck, ["driverSwap", "seatProtect", "reroll"]);
   assert.deepEqual(removeFortuneCard(deck, "seatProtect"), ["driverSwap", "reroll"]);
+});
+
+test("핀볼은 구멍에 가장 먼저 도착한 공을 당첨자로 선택한다", () => {
+  assert.deepEqual(firstArrival([{ id: "slow", arrival: 1800 }, { id: "fast", arrival: 900 }]), { id: "fast", arrival: 900 });
+  assert.equal(firstArrival([]), null);
 });

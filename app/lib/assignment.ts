@@ -74,3 +74,7 @@ export function createFortuneDeck(): FortuneCardId[] {
 export function removeFortuneCard(deck: FortuneCardId[], cardId: FortuneCardId): FortuneCardId[] {
   return deck.filter((id) => id !== cardId);
 }
+
+export function firstArrival<T extends { arrival: number }>(items: T[]): T | null {
+  return items.reduce<T | null>((winner, item) => winner === null || item.arrival < winner.arrival ? item : winner, null);
+}
