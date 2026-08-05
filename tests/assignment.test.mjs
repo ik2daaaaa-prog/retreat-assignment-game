@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  createSeatAssignments,
   createVehicle,
   passengerSeatIds,
   remainingParticipantIds,
@@ -22,4 +23,12 @@ test("후보 제외, 결정적 추첨, 정원 부족을 계산한다", () => {
   assert.deepEqual(remainingParticipantIds(["p1", "p2", "p3"], ["p1", "p3"]), ["p2"]);
   assert.equal(selectRandom(["p1", "p2"], () => 0.99), "p2");
   assert.deepEqual(validateCapacity(9, [createVehicle("v1", "p1", "카니발")]), { valid: false, availableSeats: 5, missingSeats: 3 });
+});
+
+test("운전자는 운전석에 고정되고 남은 참가자만 좌석 후보가 된다", () => {
+  const vehicle = createVehicle("v1", "p1", "카니발");
+  const assignments = { ...createSeatAssignments(vehicle), "v1:front-right": "p2" };
+  assert.deepEqual(createSeatAssignments(vehicle), { "v1:driver": "p1" });
+  assert.deepEqual(remainingParticipantIds(["p1", "p2", "p3"], Object.values(assignments)), ["p3"]);
+  assert.equal(passengerSeatIds(vehicle).includes("row3-right"), true);
 });

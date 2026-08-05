@@ -22,6 +22,10 @@ export function passengerSeatIds(vehicle: Vehicle): SeatId[] {
   return vehicle.seatIds.filter((seatId) => seatId !== "driver");
 }
 
+export function createSeatAssignments(vehicle: Vehicle): Assignment {
+  return { [`${vehicle.id}:driver`]: vehicle.driverId };
+}
+
 export function remainingParticipantIds(ids: string[], excluded: string[]): string[] {
   const excludedSet = new Set(excluded);
   return ids.filter((id) => !excludedSet.has(id));

@@ -3,19 +3,35 @@
 import { useMemo, useState } from "react";
 import { ParticipantSetup } from "./components/ParticipantSetup";
 import { Roulette } from "./components/Roulette";
-import { remainingParticipantIds, type Phase } from "./lib/assignment";
+import { AssignmentBoard } from "./components/AssignmentBoard";
+import { VehicleRegistration } from "./components/VehicleRegistration";
+import { createSeatAssignments, createVehicle, passengerSeatIds, remainingParticipantIds, validateCapacity, type Assignment, type Phase, type Vehicle } from "./lib/assignment";
 
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [participants, setParticipants] = useState<string[]>([]);
   const [driverIds, setDriverIds] = useState<string[]>([]);
+  const [vehicleLabels, setVehicleLabels] = useState<Record<string, string>>({});
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicleSeatAssignments, setVehicleSeatAssignments] = useState<Assignment>({});
+  const [seatIndex, setSeatIndex] = useState(0);
+  const [capacityError, setCapacityError] = useState("");
 
   const driverCandidates = useMemo(
     () => remainingParticipantIds(participants, driverIds).map((label) => ({ id: label, label })),
     [participants, driverIds],
   );
 
-  const reset = () => { setParticipants([]); setDriverIds([]); setPhase("setup"); };
+  const seatQueue = useMemo(() => vehicles.flatMap((vehicle) => passengerSeatIds(vehicle).map((seatId) => ({ vehicleId: vehicle.id, seatId }))), [vehicles]);
+  const currentSeat = seatQueue[seatIndex];
+  const seatCandidates = useMemo(() => remainingParticipantIds(participants, Object.values(vehicleSeatAssignments)).map((label) => ({ id: label, label })), [participants, vehicleSeatAssignments]);
+  const reset = () => { setParticipants([]); setDriverIds([]); setVehicleLabels({}); setVehicles([]); setVehicleSeatAssignments({}); setSeatIndex(0); setCapacityError(""); setPhase("setup"); };
+  const registerVehicles = () => {
+    const nextVehicles = driverIds.map((driverId, index) => createVehicle(`vehicle-${index + 1}`, driverId, vehicleLabels[driverId] || ""));
+    const capacity = validateCapacity(participants.length, nextVehicles);
+    if (!capacity.valid) { setCapacityError(`좌석이 ${capacity.missingSeats}자리 부족합니다. 운전자를 추가하거나 차량을 수정하세요.`); return; }
+    setCapacityError(""); setVehicles(nextVehicles); setVehicleSeatAssignments(Object.assign({}, ...nextVehicles.map(createSeatAssignments))); setSeatIndex(0); setPhase("seats");
+  };
 
   return (
     <main className="app-shell">
@@ -43,7 +59,11 @@ export default function Home() {
         </section>
       )}
 
-      {phase !== "setup" && phase !== "drivers" && <section className="game-card"><div className="section-kicker">NEXT ROUND</div><h2>다음 배정 준비 중입니다</h2><p className="intro">차량 등록과 좌석 배정 화면이 이어집니다.</p><button className="back-button" type="button" onClick={() => setPhase("drivers")}>← 운전자 다시 보기</button></section>}
+      {phase === "vehicles" && <VehicleRegistration driverIds={driverIds} values={vehicleLabels} onChange={(driverId, label) => setVehicleLabels((current) => ({ ...current, [driverId]: label }))} onContinue={registerVehicles} error={capacityError} />}
+
+      {phase === "seats" && currentSeat && <section className="game-card"><div className="section-kicker">ROUND 03 · SEAT DRAW {seatIndex + 1}/{seatQueue.length}</div><h2>차량 좌석을 배정합니다</h2><p className="intro">현재 좌석: <b>{vehicles.find((vehicle) => vehicle.id === currentSeat.vehicleId)?.label}</b> · <b>{currentSeat.seatId}</b></p><div className="game-grid"><Roulette candidates={seatCandidates} onComplete={(winner) => { setVehicleSeatAssignments((current) => ({ ...current, [`${currentSeat.vehicleId}:${currentSeat.seatId}`]: winner.id })); if (seatIndex + 1 >= seatQueue.length) setPhase("rooms"); else setSeatIndex((current) => current + 1); }} buttonLabel="좌석 추첨" /><AssignmentBoard vehicles={vehicles} assignments={vehicleSeatAssignments} /></div><button className="back-button" type="button" onClick={() => setPhase("vehicles")}>← 차량 정보 수정</button></section>}
+
+      {phase !== "setup" && phase !== "drivers" && phase !== "vehicles" && phase !== "seats" && <section className="game-card"><div className="section-kicker">NEXT ROUND</div><h2>방과 설거지 배정이 이어집니다</h2><p className="intro">차량 좌석 배정이 끝났습니다. 다음 단계에서 방과 설거지 역할을 설정합니다.</p><AssignmentBoard vehicles={vehicles} assignments={vehicleSeatAssignments} /><button className="back-button" type="button" onClick={() => setPhase("seats")}>← 좌석 다시 보기</button></section>}
       <footer><span>RETREAT RANDOMIZER · FAIR BY DESIGN</span><span>{participants.length} PARTICIPANTS · {driverIds.length} DRIVERS</span></footer>
     </main>
   );
