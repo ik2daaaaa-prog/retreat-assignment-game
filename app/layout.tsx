@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "나만 아니면 돼!!! · 랜덤 배정 게임",
+  title: "응~나만 아니면 돼~",
   description: "운전자, 차량 좌석, 방 배정을 룰렛으로 정하는 야유회 게임.",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
