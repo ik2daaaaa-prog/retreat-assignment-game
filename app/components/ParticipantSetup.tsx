@@ -23,7 +23,7 @@ export function ParticipantSetup({ participants, onChange, onStart }: Participan
   return (
     <section className="setup-card">
       <div className="section-kicker">ROUND 00 · CHECK-IN</div>
-      <h2>응~나만 아니면 돼~</h2>
+      <h2>통합수리장 랜덤 배정게임</h2>
       <p className="intro">참가자를 등록하면 운전자부터 차량 좌석과 방까지 룰렛으로 정합니다.</p>
       <div className="input-row">
         <input
